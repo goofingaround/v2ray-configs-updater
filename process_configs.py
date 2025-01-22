@@ -20,8 +20,36 @@ if response.status_code == 200:
         decoded_content = base64.b64decode(base64_content).decode('utf-8', errors='ignore')
         print(f"Decoded content length: {len(decoded_content)} characters")
         
-        # Split configurations by line
-        configs = decoded_content.splitlines()
+        # List of supported protocol prefixes
+        protocol_prefixes = [
+            "vmess://",
+            "vless://",
+            "trojan://",
+            "ss://",
+            "hysteria://",
+            "hysteria2://",
+            "warp://",
+            "wireguard://"
+        ]
+        
+        # Split the decoded content into individual configurations
+        configs = []
+        for prefix in protocol_prefixes:
+            # Split the content by the protocol prefix
+            parts = decoded_content.split(prefix)
+            if len(parts) > 1:
+                # The first part is not a configuration, so skip it
+                for part in parts[1:]:
+                    # Find the end of the configuration (next protocol prefix or end of string)
+                    end_index = len(part)
+                    for next_prefix in protocol_prefixes:
+                        next_index = part.find(next_prefix)
+                        if next_index != -1 and next_index < end_index:
+                            end_index = next_index
+                    # Extract the configuration
+                    config = prefix + part[:end_index]
+                    configs.append(config)
+        
         print(f"Total configurations found: {len(configs)}")
         
         # Organize configurations by protocol
@@ -31,7 +59,9 @@ if response.status_code == 200:
             "trojan": [],
             "shadowsocks": [],
             "hysteria": [],
-            "hysteria2": []
+            "hysteria2": [],
+            "warp": [],
+            "wireguard": []
         }
         
         valid_configs_found = False
@@ -55,6 +85,12 @@ if response.status_code == 200:
                 valid_configs_found = True
             elif config.startswith("hysteria2://"):
                 protocols["hysteria2"].append(config)
+                valid_configs_found = True
+            elif config.startswith("warp://"):
+                protocols["warp"].append(config)
+                valid_configs_found = True
+            elif config.startswith("wireguard://"):
+                protocols["wireguard"].append(config)
                 valid_configs_found = True
             else:
                 print(f"Skipping unknown configuration: {config[:50]}...")  # Print first 50 chars for debugging
