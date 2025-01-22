@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT }}  # Use the PAT for checkout
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -27,9 +29,8 @@ jobs:
         run: python process_configs.py
 
       - name: Commit and push changes
-        if: success()
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}  # Use the PAT for pushing changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
