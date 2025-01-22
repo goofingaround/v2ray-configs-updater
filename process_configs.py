@@ -12,10 +12,12 @@ if response.status_code == 200:
     # Remove non-ASCII characters from the response text
     cleaned_content = response.text.encode('ascii', 'ignore').decode('ascii')
     
+    # Extract the base64 part (assuming it starts after the first line)
+    base64_content = cleaned_content.split("\n", 1)[-1].strip()
+    
     # Decode the base64 content
     try:
-        # Ensure the content is valid base64
-        decoded_content = base64.b64decode(cleaned_content).decode('utf-8', errors='ignore')
+        decoded_content = base64.b64decode(base64_content).decode('utf-8', errors='ignore')
         print(f"Decoded content length: {len(decoded_content)} characters")
         
         # Split configurations by line
