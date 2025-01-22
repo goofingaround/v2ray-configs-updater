@@ -29,6 +29,7 @@ jobs:
         run: python process_configs.py
 
       - name: Commit and push changes
+        if: success()
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}  # Use the PAT for pushing changes
         run: |
