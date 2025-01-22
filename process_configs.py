@@ -14,6 +14,7 @@ if response.status_code == 200:
     
     # Decode the base64 content
     try:
+        # Ensure the content is valid base64
         decoded_content = base64.b64decode(cleaned_content).decode('utf-8', errors='ignore')
         print(f"Decoded content length: {len(decoded_content)} characters")
         
@@ -31,40 +32,47 @@ if response.status_code == 200:
             "hysteria2": []
         }
         
+        valid_configs_found = False
         for config in configs:
             if not config.strip():  # Skip empty lines
                 continue
             if config.startswith("vmess://"):
                 protocols["vmess"].append(config)
+                valid_configs_found = True
             elif config.startswith("vless://"):
                 protocols["vless"].append(config)
+                valid_configs_found = True
             elif config.startswith("trojan://"):
                 protocols["trojan"].append(config)
+                valid_configs_found = True
             elif config.startswith("ss://"):
                 protocols["shadowsocks"].append(config)
+                valid_configs_found = True
             elif config.startswith("hysteria://"):
                 protocols["hysteria"].append(config)
+                valid_configs_found = True
             elif config.startswith("hysteria2://"):
                 protocols["hysteria2"].append(config)
+                valid_configs_found = True
             else:
                 print(f"Skipping unknown configuration: {config[:50]}...")  # Print first 50 chars for debugging
         
+        if not valid_configs_found:
+            print("No valid configurations found.")
+            exit(0)  # Exit gracefully if no valid configs are found
+        
         # Save each protocol's configurations to a separate file
-        files_created = False
         for protocol, configs in protocols.items():
             if configs:  # Only create a file if there are configurations
                 with open(f"{protocol}.txt", "w", encoding='utf-8') as file:
                     file.write("\n".join(configs))
                 print(f"Saved {len(configs)} configurations to {protocol}.txt")
-                files_created = True
-            else:
-                print(f"No configurations found for {protocol}")
-        
-        if not files_created:
-            print("No valid configurations found to save.")
     except Exception as e:
         print(f"Error decoding or processing configurations: {e}")
+        exit(1)  # Exit with error if decoding fails
 elif response.status_code == 404:
     print("Error: The configurations file was not found (404). Please check the URL.")
+    exit(1)
 else:
     print(f"Failed to fetch configurations. Status code: {response.status_code}")
+    exit(1)
