@@ -14,7 +14,7 @@ if response.status_code == 200:
     
     # Decode the base64 content
     try:
-        decoded_content = base64.b64decode(cleaned_content).decode('utf-8')
+        decoded_content = base64.b64decode(cleaned_content).decode('utf-8', errors='ignore')
         print(f"Decoded content length: {len(decoded_content)} characters")
         
         # Split configurations by line
@@ -53,7 +53,7 @@ if response.status_code == 200:
         files_created = False
         for protocol, configs in protocols.items():
             if configs:  # Only create a file if there are configurations
-                with open(f"{protocol}.txt", "w") as file:
+                with open(f"{protocol}.txt", "w", encoding='utf-8') as file:
                     file.write("\n".join(configs))
                 print(f"Saved {len(configs)} configurations to {protocol}.txt")
                 files_created = True
