@@ -32,6 +32,8 @@ if response.status_code == 200:
         }
         
         for config in configs:
+            if not config.strip():  # Skip empty lines
+                continue
             if config.startswith("vmess://"):
                 protocols["vmess"].append(config)
             elif config.startswith("vless://"):
@@ -44,17 +46,22 @@ if response.status_code == 200:
                 protocols["hysteria"].append(config)
             elif config.startswith("hysteria2://"):
                 protocols["hysteria2"].append(config)
+            else:
+                print(f"Skipping unknown configuration: {config[:50]}...")  # Print first 50 chars for debugging
         
         # Save each protocol's configurations to a separate file
+        files_created = False
         for protocol, configs in protocols.items():
             if configs:  # Only create a file if there are configurations
                 with open(f"{protocol}.txt", "w") as file:
                     file.write("\n".join(configs))
                 print(f"Saved {len(configs)} configurations to {protocol}.txt")
+                files_created = True
             else:
                 print(f"No configurations found for {protocol}")
         
-        print("Configurations processed and saved successfully!")
+        if not files_created:
+            print("No valid configurations found to save.")
     except Exception as e:
         print(f"Error decoding or processing configurations: {e}")
 elif response.status_code == 404:
